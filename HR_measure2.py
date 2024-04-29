@@ -57,7 +57,7 @@ def hr_measure(encoder, oled, display_menu, display):
     peak_max = 0
     
     start_time = time.time()
-    measurement_duration = 5
+    measurement_duration = 30
 
     while True:
         if sensor.fifo.has_data():
@@ -70,8 +70,6 @@ def hr_measure(encoder, oled, display_menu, display):
                 sample_counter += 1
                 
                 if threshold_counter == threshold_update_interval:
-                    #curr_min, curr_max = find_threshold(frequency, data)
-                    #print(init_threshold)
                     threshold_counter = 0
                     curr_min = min_val
                     curr_max = max_val
@@ -106,14 +104,19 @@ def hr_measure(encoder, oled, display_menu, display):
                 threshold_counter += 1
                 if encoder.switch.value() == 0:
                     sensor.stop_reading()
-                    #display_menu()
                     return
                 
         if display == False:
             if time.time() - start_time >= measurement_duration:
                 break
+            remaining_time = measurement_duration - (time.time() - start_time)
+            oled.fill(0)
+            oled.text("MEASURING...", 20, 20, 1)
+            oled.text(f"Hold for {remaining_time}s", 20, 30, 1)
+            oled.show()
     sensor.stop_reading()
     return ppi
+                
                 
                 
                     
