@@ -1,5 +1,18 @@
+import time
+
 def hrv_analysis(ppi_ms_list):
-    results = {}
+    current_timestamp = time.time()
+    formatted_time = time.localtime(current_timestamp)
+                    
+    print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
+    results = {
+        "": f"{formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}",
+        "Avg PPI" : 0,
+        "Avg HR" : 0,
+        "RMSSD" : 0,
+        "SDNN" : 0
+        }
+    
     avg_ppi = int(sum(ppi_ms_list)/len(ppi_ms_list))
     results["Avg PPI"] = avg_ppi
     avg_hr = int(60/(avg_ppi/1000))
@@ -19,7 +32,7 @@ def hrv_analysis(ppi_ms_list):
     results["SDNN"] = sdnn
     
     sorted_results = dict(sorted(results.items()))
-    return sorted_results
+    return results
     
     
     
