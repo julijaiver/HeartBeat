@@ -5,6 +5,7 @@ from ssd1306 import SSD1306_I2C
 from HR_measure import hr_measure
 from HRV import hrv_analysis
 from kubios import kubios
+from mqtt import connect_wlan
 import time
 import micropython
 
@@ -123,8 +124,25 @@ while True:
                     display_text("Place finger")
                     time.sleep(3)
                     ppi_list = hr_measure(encoder, oled, display_menu, display=False)
+                    
+                    connect_wlan()
                     kubios_data = kubios(ppi_list)
+                    print(kubios_data)
+                    
+                    oled.fill(0)
+                    yval = 0
+                    oled.text(f"{kubios_data['Time']}", xval, yval, 1)
+                    yval += text_height*2
+                    
+                    result_list = ['RMSSD', 'SDNN', 'HR', 'PNS', 'SNS', 'STRESS']
+                    display_results(kubios_data, result_list)
+                    
+                    check_for_button()
+                
+                elif selected_item == 3:
+                    
                     
                                             
     display_menu()
+    
 
