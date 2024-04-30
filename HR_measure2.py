@@ -115,8 +115,8 @@ def hr_measure(encoder, oled, display_menu, display):
                 break
             remaining_time = measurement_duration - (time.time() - start_time)
             oled.fill(0)
-            oled.text("MEASURING...", 20, 20, 1)
-            oled.text(f"Hold for {remaining_time}s", 20, 30, 1)
+            oled.text("MEASURING...", 20, 35, 1)
+            oled.text(f"Hold for {remaining_time}s", 20, 45, 1)
             oled.show()
     sensor.stop_reading()
     return ppi
