@@ -3,6 +3,7 @@ from machine import ADC, Pin
 from piotimer import Piotimer
 from fifo import Fifo
 
+
 class Sensor:
     def __init__(self, pin):
         self.adc = ADC(Pin(pin))
@@ -95,9 +96,12 @@ def hr_measure(encoder, oled, display_menu, display):
                         avg_heart_rate = int(60 / (ppi_ms / 1000))
                         if min_heart_rate <= avg_heart_rate <= max_heart_rate:
                             ppi.append(ppi_ms)
+                            oled.rect(0,0,128,32,0)
+                            oled.show()
                             if display == True:
                                 oled.fill(0)
-                                oled.text(f"{str(avg_heart_rate)} BPM", 35, 30, 1)
+                                oled.blit(heart_graph.image(),20,0)
+                                oled.text(f"{str(avg_heart_rate)} BPM", 35, 40, 1)
                                 oled.text("PRESS TO STOP", 10, 50, 1)
                                 oled.show()
                             print(avg_heart_rate)

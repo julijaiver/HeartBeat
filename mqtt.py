@@ -36,31 +36,3 @@ def connect_mqtt(topic, message):
             
     except Exception as e:
         print(f"Failed to send MQTT message: {e}")
-
-    #return mqtt_client
-
-# Main program
-if __name__ == "__main__":
-    #Connect to WLAN
-    connect_wlan()
-    
-    # Connect to MQTT
-    try:
-        mqtt_client=connect_mqtt()
-        
-    except Exception as e:
-        print(f"Failed to connect to MQTT: {e}")
-
-    # Send MQTT message
-    try:
-        while True:
-            # Sending a message every 5 seconds.
-            topic = topic
-            message = message
-            mqtt_client.publish(topic, message)
-            print(f"Sending to MQTT: {topic} -> {message}")
-            sleep(5)
-            
-    except Exception as e:
-        print(f"Failed to send MQTT message: {e}")
-
