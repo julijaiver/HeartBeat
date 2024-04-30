@@ -1,10 +1,13 @@
 import urequests as requests
 import ujson
 import network
-from time import sleep
-from mqtt import connect_wlan
+import time
 
 def kubios(intervals):
+    
+    current_timestamp = time.time()
+    formatted_time = time.localtime(current_timestamp)
+    
     APIKEY = "pbZRUi49X48I56oL1Lq8y8NDjq6rPfzX3AQeNo3a"
     CLIENT_ID = "3pjgjdmamlj759te85icf0lucv"
     CLIENT_SECRET = "111fqsli1eo7mejcrlffbklvftcnfl4keoadrdv1o45vt9pndlef"
@@ -38,8 +41,26 @@ def kubios(intervals):
                     "X-Api-Key": APIKEY},
         json = dataset) #dataset will be automatically converted to JSON by the urequests
 
-    response = response.json()
+    r = response.json()
     
-    return response
+    cleaned = {
+        'Time': None,
+        'RMSSD': 0,
+        'SDNN': 0,
+        'HR': 0,
+        'PNS': 0,
+        'SNS': 0,
+        'STRESS': 0
+        }
+    
+    cleaned['Time'] = f"{formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}"
+    cleaned['RMSSD'] = r['analysis']['rmssd_ms']
+    cleaned['PNS'] = r['analysis']['pns_index']
+    cleaned['HR'] = r['analysis']['mean_hr_bpm']
+    cleaned['SNS'] = r['analysis']['sns_index']
+    cleaned['SDNN'] = r['analysis']['sdnn_ms']
+    cleaned['STRESS'] = r['analysis']['stress_index']
+    
+    return cleaned
 
 
