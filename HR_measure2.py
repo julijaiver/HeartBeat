@@ -2,7 +2,8 @@ import time
 from machine import ADC, Pin
 from piotimer import Piotimer
 from fifo import Fifo
-
+import heart
+import heart_graph
 
 class Sensor:
     def __init__(self, pin):
@@ -58,7 +59,7 @@ def hr_measure(encoder, oled, display_menu, display):
     peak_max = 0
     
     start_time = time.time()
-    measurement_duration = 30
+    measurement_duration = 15
 
     while True:
         if sensor.fifo.has_data():
@@ -96,7 +97,7 @@ def hr_measure(encoder, oled, display_menu, display):
                         avg_heart_rate = int(60 / (ppi_ms / 1000))
                         if min_heart_rate <= avg_heart_rate <= max_heart_rate:
                             ppi.append(ppi_ms)
-                            oled.rect(0,0,128,32,0)
+                            oled.fill_rect(0,0,128,32,0)
                             oled.show()
                             if display == True:
                                 oled.fill(0)
@@ -113,11 +114,15 @@ def hr_measure(encoder, oled, display_menu, display):
         if display == False:
             if time.time() - start_time >= measurement_duration:
                 break
-            remaining_time = measurement_duration - (time.time() - start_time)
+            remaining_time = measurement_duration - (time.time() - start_time) - 1
             oled.fill(0)
             oled.text("MEASURING...", 20, 35, 1)
             oled.text(f"Hold for {remaining_time}s", 20, 45, 1)
+            if remaining_time == 0:
+                oled.fill(0)
+                oled.text("CALCULATING...", 20, 35, 1)
             oled.show()
+            print(remaining_time)
     sensor.stop_reading()
     return ppi
                 
