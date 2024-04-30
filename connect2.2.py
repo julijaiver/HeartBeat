@@ -4,6 +4,7 @@ from fifo import Fifo
 from ssd1306 import SSD1306_I2C
 from HR_measure import hr_measure
 from HRV import hrv_analysis
+from kubios import kubios
 import time
 import micropython
 
@@ -33,17 +34,13 @@ class Encoder:
         self.last_press_time = current_time
 
 
-        
-        
+    
 i2c = I2C(1, scl=Pin(15), sda=Pin(14), freq=400000)
 oled_width = 128
 oled_height = 64
 oled = SSD1306_I2C(oled_width, oled_height, i2c)
 
 encoder = Encoder(10, 11, 12)
-#sensor = Sensor(26)
-#timer = Piotimer(period=4, mode=Piotimer.PERIODIC, callback=sensor.read_samples)
-
 
 menu_items = ["HR measurement","HRV analysis","Kubios","History"]
 selected_item = 0
@@ -73,11 +70,18 @@ def check_for_button():
         while encoder.fifo.empty():
             pass
         value = encoder.fifo.get()
+
+def display_results(results, result_list):
+    global yval, text_height
+    for item in result_list:
+        oled.text(f"{item}: {results[item]}", xval, yval, 1)
+        yval += text_height
+    oled.show()
+
     
 display_menu()
     
-while True:
-    
+while True:   
     if encoder.fifo.has_data():
         while encoder.fifo.has_data():
             value = encoder.fifo.get()
@@ -87,42 +91,40 @@ while True:
                     selected_item = len(menu_items)-1
                 elif selected_item <= 0:  
                     selected_item = 0
-                # The following line of code jumps from last to first when rotating
-                #selected_item = (selected_item + value) % len(menu_items)
             else:
                 if selected_item == 0:
                     display_text("Place finger")
-                    #place_finger_displayed = True
                     time.sleep(3)
-                    
-                    #sensor.start_reading()
-                    #time.sleep(1)
                     hr_measure(encoder, oled, display_menu, display=True)
-                    #sensor.stop_reading()
                     check_for_button()
+                    
                 elif selected_item == 1:
                     display_text("Place finger")
                     time.sleep(3)
-                    display_text("Hold for 30s")
-                    #sensor.start_reading()
-                    #time.sleep(3)
                     ppi_list = hr_measure(encoder, oled, display_menu, display=False)
                     results = hrv_analysis(ppi_list)
                     
                     oled.fill(0)
-                    for i, (measurement, value) in enumerate(results.items()):
-                        text = f"{measurement}: {value}"
-                        oled.text(text, xval, i*text_height, 1)
-                    oled.show()
+                    yval = 0
+                    oled.text(f"{results['Time']}", xval, yval, 1)
+                    yval += text_height*2
+                    
+                    result_items = ['Avg HR', 'Avg PPI', 'RMSSD', 'SDNN']
+                    display_results(results, result_items)
             
-                    current_timestamp = time.time()
-                    formatted_time = time.localtime(current_timestamp)
+                    #current_timestamp = time.time()
+                    #formatted_time = time.localtime(current_timestamp)
             
-                    print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
+                    #print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
                     print(results)
-                    #print(formatted_datetime)
                     check_for_button()
-                        
+                    
+                elif selected_item == 2:
+                    display_text("Place finger")
+                    time.sleep(3)
+                    ppi_list = hr_measure(encoder, oled, display_menu, display=False)
+                    kubios_data = kubios(ppi_list)
+                    
+                                            
     display_menu()
-    
 
