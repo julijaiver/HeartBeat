@@ -97,9 +97,9 @@ def hr_measure(encoder, oled, display_menu, display):
                         avg_heart_rate = int(60 / (ppi_ms / 1000))
                         if min_heart_rate <= avg_heart_rate <= max_heart_rate:
                             ppi.append(ppi_ms)
-                            oled.fill_rect(0,0,128,32,0)
-                            oled.show()
                             if display == True:
+                                oled.fill_rect(0,0,128,32,0)
+                                oled.show()
                                 oled.fill(0)
                                 oled.blit(heart_graph.image(),20,0)
                                 oled.text(f"{str(avg_heart_rate)} BPM", 35, 40, 1)
