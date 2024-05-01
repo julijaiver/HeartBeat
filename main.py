@@ -8,6 +8,7 @@ from kubios import kubios
 from mqtt import connect_wlan
 import time
 import micropython
+import text_display
 
 micropython.alloc_emergency_exception_buf(200)
 
@@ -62,7 +63,8 @@ display_menu()
 
 def display_text(text):
     oled.fill(0)
-    oled.text(text, text_height*2, int(oled_height/2), 1)
+    text,width,height = text_display.center(text)
+    oled.text(text,width,height,1)
     oled.show()
     
 def check_for_button():
@@ -77,7 +79,8 @@ def display_results(results, result_list):
     for item in result_list:
         oled.text(f"{item}: {results[item]}", xval, yval, 1)
         yval += text_height
-    oled.text("PRESS TO EXIT", 10, 50, 1)
+    text,width,height = text_display.bottom("PRESS TO EXIT",1)
+    oled.text(text,width,height,1)
     oled.show()
 
     
@@ -113,12 +116,9 @@ while True:
                     
                     result_items = ['Avg HR', 'Avg PPI', 'RMSSD', 'SDNN']
                     display_results(results, result_items)
-            
                     #current_timestamp = time.time()
                     #formatted_time = time.localtime(current_timestamp)
-            
                     #print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
-                    print(results)
                     check_for_button()
                     
                 elif selected_item == 2:

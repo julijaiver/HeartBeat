@@ -4,6 +4,7 @@ from piotimer import Piotimer
 from fifo import Fifo
 import heart
 import heart_graph
+import text_display
 
 class Sensor:
     def __init__(self, pin):
@@ -102,8 +103,10 @@ def hr_measure(encoder, oled, display_menu, display):
                                 oled.show()
                                 oled.fill(0)
                                 oled.blit(heart_graph.image(),20,0)
-                                oled.text(f"{str(avg_heart_rate)} BPM", 35, 40, 1)
-                                oled.text("PRESS TO STOP", 10, 50, 1)
+                                text,width,height = text_display.bottom(f"{str(avg_heart_rate)} BPM",3)
+                                oled.text(text,width,height,1)
+                                text,width,height = text_display.bottom("PRESS TO STOP",1)
+                                oled.text(text,width,height,1)
                                 oled.show()
                             print(avg_heart_rate)
                 threshold_counter += 1
@@ -116,16 +119,18 @@ def hr_measure(encoder, oled, display_menu, display):
                 break
             remaining_time = measurement_duration - (time.time() - start_time) - 1
             oled.fill(0)
-            oled.text("MEASURING...", 20, 35, 1)
-            oled.text(f"Hold for {remaining_time}s", 20, 45, 1)
+            text,width,height = text_display.center("MEASURING...")
+            oled.text(text,width,height,1)
+            text,width,height = text_display.bottom(f"Hold for {remaining_time}s",3)
+            oled.text(text,width,height,1)
             if remaining_time == 0:
                 oled.fill(0)
-                oled.text("CALCULATING...", 20, 35, 1)
+                text,width,height = text_display.center("CALCULATING...")
+                oled.text(text,width,height,1)
             oled.show()
-            print(remaining_time)
     sensor.stop_reading()
     return ppi
                 
                 
                 
-                    
+               
