@@ -6,7 +6,7 @@ def hrv_analysis(ppi_ms_list):
                     
     print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
     results = {
-        "": f"{formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}",
+        "Time": f"{formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}",
         "Avg PPI" : 0,
         "Avg HR" : 0,
         "RMSSD" : 0,
