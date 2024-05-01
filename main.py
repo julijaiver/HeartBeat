@@ -77,6 +77,7 @@ def display_results(results, result_list):
     for item in result_list:
         oled.text(f"{item}: {results[item]}", xval, yval, 1)
         yval += text_height
+    oled.text("PRESS TO EXIT", 10, 50, 1)
     oled.show()
 
     
