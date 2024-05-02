@@ -8,6 +8,7 @@ from kubios import kubios
 from mqtt import connect_wlan
 import time
 import micropython
+import json
 
 micropython.alloc_emergency_exception_buf(200)
 
@@ -80,8 +81,36 @@ def display_results(results, result_list):
     oled.text("PRESS TO EXIT", 10, 50, 1)
     oled.show()
 
+def save_history(new_data):
+    with open("data.json", "r+") as file:
+        file_data = json.load(file)
+        file_data["history"].append(new_data)
+        file.seek(0)
+        json.dump(file_data, file)
+        print("data saved")
+
+def get_history():
+    history_list = None
+    with open("data.json", "r+") as file:
+        file_data = json.load(file)
+        history_list = file_data["history"]
+        history_list.append({"Time": "Exit"})
+    if len(history_list) <= 7:
+        return history_list
+    else:
+        return history_list[-6:]
+
+def display_history_menu(history_list):
+    oled.fill(0)
+    oled.text("Data History", 0, 0, 1)
+    oled.fill_rect(xval, (selected_item+1)*text_height, oled_width, text_height, 1)
+    for i, item in enumerate(history_list):
+        text_color = 0 if i == selected_item else 1
+        oled.text(item['Time'], xval+text_height, (i+1)*text_height, text_color)
+    oled.show()
     
 display_menu()
+history_on = False
     
 while True:   
     if encoder.fifo.has_data():
@@ -105,7 +134,7 @@ while True:
                     time.sleep(3)
                     ppi_list = hr_measure(encoder, oled, display_menu, display=False)
                     results = hrv_analysis(ppi_list)
-                    
+                    save_history(results)
                     oled.fill(0)
                     yval = 0
                     oled.text(f"{results['Time']}", xval, yval, 1)
@@ -128,6 +157,7 @@ while True:
                     
                     connect_wlan()
                     kubios_data = kubios(ppi_list)
+                    save_history(kubios_data)
                     print(kubios_data)
                     
                     oled.fill(0)
@@ -141,6 +171,41 @@ while True:
                     check_for_button()
                 
                 elif selected_item == 3:
+                    history_on = True
+                    history = get_history()
+                    while history_on:
+                        display_history_menu(history)
+                        while encoder.fifo.has_data():
+                            value = encoder.fifo.get()
+                            if value != 0:
+                                selected_item += value
+                                if selected_item >= len(history)-1:
+                                    selected_item = len(history)-1
+                                elif selected_item <= 0:  
+                                    selected_item = 0
+                            else:
+                                if selected_item != len(history) - 1:
+                                    selected_history = history[selected_item]
+                                    history_result_display = True
+                                    while history_result_display:
+                                        if len(selected_history) == 5:
+                                            result_items = ['Avg HR', 'Avg PPI', 'RMSSD', 'SDNN']
+                                        if len(selected_history) == 7:
+                                            result_items = ['RMSSD', 'SDNN', 'HR', 'PNS', 'SNS', 'STRESS']
+                                        oled.fill(0)
+                                        yval = 0
+                                        oled.text(f"{selected_history['Time']}", xval, yval, 1)
+                                        yval += text_height*2
+                                        display_results(history[selected_item], result_items)
+                                        if encoder.fifo.has_data():
+                                            history_result_display = encoder.fifo.get()
+                                else:
+                                   history_on = False
+                                
+                        
+                    
+                    
+                    
                     
                     
                                             
