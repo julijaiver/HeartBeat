@@ -60,7 +60,7 @@ def hr_measure(encoder, oled, display_menu, display):
     peak_max = 0
     
     start_time = time.time()
-    measurement_duration = 15
+    measurement_duration = 31
 
     while True:
         if sensor.fifo.has_data():

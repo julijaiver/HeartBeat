@@ -1,6 +1,7 @@
 import network
 from time import sleep
 from umqtt.simple import MQTTClient
+from machine import Timer
 
 # Replace these values with your own
 SSID = "KMD652_Group_4"
@@ -13,14 +14,24 @@ def connect_wlan():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(SSID, PASSWORD)
+    
+    timer = Timer(-1)
+    timeout = 7
+    elapsed_time = 0
 
     # Attempt to connect once per second
-    while wlan.isconnected() == False:
-        print("Connecting... ")
-        sleep(1)
-
-    # Print the IP address of the Pico
-    print("Connection successful. Pico IP:", wlan.ifconfig()[0])
+    while elapsed_time < timeout:
+        if wlan.isconnected():
+            print("Connection successful. Pico IP:", wlan.ifconfig()[0])
+            return True
+        else:
+            print("Connecting... ")
+            elapsed_time += 1
+            sleep(1)
+    
+    print("Connection failed")
+    return False
+    
     
 def connect_mqtt(topic, message):
     mqtt_client=MQTTClient("", BROKER_IP)
