@@ -189,7 +189,7 @@ while True:
                         oled.fill(0)
                         yval = 0
                         oled.text(f"{kubios_data['Time']}", xval, yval, 1)
-                        yval += text_height
+                        yval += text_height*2
                         result_list = ['RMSSD', 'SDNN', 'HR','SD1','SD2', 'PNS', 'SNS', 'STRESS']
                         display_kubios_results(kubios_data, result_list)
                         while encoder.fifo.has_data():
