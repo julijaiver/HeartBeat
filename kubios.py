@@ -48,6 +48,8 @@ def kubios(intervals):
         'RMSSD': 0,
         'SDNN': 0,
         'HR': 0,
+        'SD1': 0,
+        'SD2': 0,
         'PNS': 0,
         'SNS': 0,
         'STRESS': 0
@@ -57,6 +59,8 @@ def kubios(intervals):
     cleaned['RMSSD'] = r['analysis']['rmssd_ms']
     cleaned['PNS'] = r['analysis']['pns_index']
     cleaned['HR'] = r['analysis']['mean_hr_bpm']
+    cleaned['SD1'] = r['analysis']['sd1_ms']
+    cleaned['SD2'] = r['analysis']['sd2_ms']
     cleaned['SNS'] = r['analysis']['sns_index']
     cleaned['SDNN'] = r['analysis']['sdnn_ms']
     cleaned['STRESS'] = r['analysis']['stress_index']

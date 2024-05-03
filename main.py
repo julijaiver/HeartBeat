@@ -2,7 +2,7 @@ from machine import Pin, ADC, I2C
 from piotimer import Piotimer
 from fifo import Fifo
 from ssd1306 import SSD1306_I2C
-from HR_measure import hr_measure
+from HR_measure2 import hr_measure
 from HRV import hrv_analysis
 from kubios import kubios
 from mqtt import connect_wlan
@@ -85,6 +85,15 @@ def display_results(results, result_list):
         yval += text_height
     oled.text("PRESS TO EXIT", 10, 55, 1)
     oled.show()
+    
+def display_kubios_results(results, result_list):
+    global yval, text_height
+    for i in range(selected_item, selected_item+4):
+        oled.text(f"{result_list[i]}: {results[result_list[i]]}", xval, yval, 1)
+        yval += text_height
+    oled.text("SCROLL DATA", 10, 48, 1)
+    oled.text("PRESS TO EXIT", 10, 56, 1)
+    oled.show()
 
 def save_history(new_data):
     with open("data.json", "r+") as file:
@@ -162,7 +171,6 @@ while True:
                     display_text("Place finger", "center")
                     time.sleep(3)
                     ppi_list = hr_measure(encoder, oled, display_menu, display=False)
-                    
                     oled.fill(0)
                     if connect_wlan():
                         display_text("Connected", "center")
@@ -175,15 +183,26 @@ while True:
                     save_history(kubios_data)
                     print(kubios_data)
                     
-                    oled.fill(0)
-                    yval = 0
-                    oled.text(f"{kubios_data['Time']}", xval, yval, 1)
-                    yval += text_height
-                    
-                    result_list = ['RMSSD', 'SDNN', 'HR', 'PNS', 'SNS', 'STRESS']
-                    display_results(kubios_data, result_list)
-                    
-                    check_for_button()
+                    kubios_data_display = True
+                    selected_item = 0
+                    while kubios_data_display:
+                        oled.fill(0)
+                        yval = 0
+                        oled.text(f"{kubios_data['Time']}", xval, yval, 1)
+                        yval += text_height
+                        result_list = ['RMSSD', 'SDNN', 'HR','SD1','SD2', 'PNS', 'SNS', 'STRESS']
+                        display_kubios_results(kubios_data, result_list)
+                        while encoder.fifo.has_data():
+                            value = encoder.fifo.get()
+                            if value != 0:
+                                selected_item += value
+                                if selected_item >= len(result_list)-4:
+                                    selected_item = len(result_list)-4
+                                elif selected_item <= 0:  
+                                    selected_item = 0
+                            else:
+                                kubios_data_display = value
+                    #check_for_button()
                 
                 elif selected_item == 3:
                     history_on = True
@@ -202,24 +221,38 @@ while True:
                                 if selected_item != len(history) - 1:
                                     selected_history = history[selected_item]
                                     history_result_display = True
+                                    selected_item = 0
                                     while history_result_display:
                                         if len(selected_history) == 5:
                                             result_items = ['Avg HR', 'Avg PPI', 'RMSSD', 'SDNN']
-                                        if len(selected_history) == 7:
-                                            result_items = ['RMSSD', 'SDNN', 'HR', 'PNS', 'SNS', 'STRESS']
-                                        oled.fill(0)
-                                        yval = 0
-                                        oled.text(f"{selected_history['Time']}", xval, yval, 1)
-                                        yval += text_height*2
-                                        display_results(history[selected_item], result_items)
-                                        if encoder.fifo.has_data():
-                                            history_result_display = encoder.fifo.get()
+                                            oled.fill(0)
+                                            yval = 0
+                                            oled.text(f"{selected_history['Time']}", xval, yval, 1)
+                                            yval += text_height*2
+                                            display_results(selected_history, result_items)
+                                            if encoder.fifo.has_data():
+                                                history_result_display = encoder.fifo.get()
+                                        else:
+                                            result_items = ['RMSSD', 'SDNN', 'HR','SD1','SD2','PNS', 'SNS', 'STRESS']
+                                            oled.fill(0)
+                                            yval = 0
+                                            oled.text(f"{selected_history['Time']}", xval, yval, 1)
+                                            yval += text_height*2
+                                            display_kubios_results(selected_history, result_items)
+                                            while encoder.fifo.has_data():
+                                                value = encoder.fifo.get()
+                                                if value != 0:
+                                                    selected_item += value
+                                                    if selected_item >= len(result_items)-4:
+                                                        selected_item = len(result_items)-4
+                                                    elif selected_item <= 0:  
+                                                        selected_item = 0
+                                                else:
+                                                    history_result_display = value
                                 else:
-                                   history_on = False         
-                    
-                    
-                    
-                                            
+                                   history_on = False
+                                   selected_item = 0
+                                                        
     display_menu()
     
 
