@@ -112,7 +112,7 @@ def get_history():
     if len(history_list) <= 7:
         return history_list
     else:
-        return history_list[-6:]
+        return history_list[-7:]
 
 def display_history_menu(history_list):
     oled.fill(0)
