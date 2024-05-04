@@ -43,12 +43,12 @@ def hr_measure(encoder, oled, display_menu, display):
 
     curr_min, curr_max = find_threshold(frequency*2, sensor)
     init_threshold = (curr_min + curr_max * 3) // 4
-    #print(curr_min, curr_max, init_threshold)
+    print(curr_min, curr_max, init_threshold)
 
     ppi = []
     curr_peak = 0
     prev_peak = 0
-    curr_max = 0
+    #curr_max = 0
     min_interval = 100 #samples
     min_heart_rate = 30
     max_heart_rate = 240
@@ -63,14 +63,43 @@ def hr_measure(encoder, oled, display_menu, display):
     start_time = time.time()
     measurement_duration = 15
     remaining_time = None
-    ppg = []
+    ppg_counter = 0
+    ppg_avg = 0
+    scaled_ppg = 0
+    scaled_ppg_counter = 0
+    previous_x = 0
+    current_x = 0
+    previous_y = 0
+    current_y = 0
     oled_width = 128
 
     while True:
         if sensor.fifo.has_data():
             while sensor.fifo.has_data():
                 value = sensor.fifo.get()
-                ppg.append(value)
+                if display:
+                    if ppg_counter < 8:
+                        ppg_avg += value
+                        ppg_counter += 1
+                    else:
+                        ppg_counter = 0
+                        ppg_avg = ppg_avg//8
+                        scaled_ppg = int((curr_max-ppg_avg)*(31/(curr_max-curr_min)))
+                        ppg_avg = 0
+                        if scaled_ppg_counter < 127:
+                            scaled_ppg_counter += 1
+                            previous_x = current_x
+                            previous_y = current_y
+                            current_x = scaled_ppg_counter
+                            current_y = scaled_ppg
+                            oled.line(previous_x,previous_y,current_x,current_y,1)
+                        else:
+                            scaled_ppg_counter = 0
+                            previous_x = 0
+                            current_x = 0
+                            oled.fill_rect(0,0,128,32,0)
+                        oled.show()
+                        
                 if value < min_val:
                     min_val = value
                 if value > max_val:
@@ -103,27 +132,12 @@ def hr_measure(encoder, oled, display_menu, display):
                         if min_heart_rate <= avg_heart_rate <= max_heart_rate:
                             ppi.append(ppi_ms)
                             if display == True:
-                                oled.fill_rect(0,0,128,32,0)
-                                oled.show()
-                                oled.fill(0)
-                                scaled_ppg = scale_ppg.scale(ppg)
-                                previous_x = None
-                                previous_y = None
-                                width=int((oled_width-len(scaled_ppg))/2)
-                                for i in range(len(scaled_ppg)):
-                                    x=i
-                                    if previous_x is not None:
-                                        oled.line(previous_x+width,previous_y,x+width,32-scaled_ppg[i]-1,1)
-                                    previous_x = x
-                                    previous_y = 32-scaled_ppg[i]-1
-                                
+                                oled.fill_rect(0,32,128,64,0)
                                 text,width,height = text_display.bottom(f"{str(avg_heart_rate)} BPM",3)
                                 oled.text(text,width,height,1)
                                 text,width,height = text_display.bottom("PRESS TO STOP",1)
                                 oled.text(text,width,height,1)
                                 oled.show()
-                                ppg.clear()
-                                scaled_ppg.clear()
                             elif not display and remaining_time != 0:
                                 oled.fill_rect(0,0,128,32,0)
                                 oled.show()

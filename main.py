@@ -141,6 +141,7 @@ while True:
                     oled.fill(0)
                     display_text("Place finger", "center")
                     time.sleep(3)
+                    oled.fill(0)
                     hr_measure(encoder, oled, display_menu, display=True)
                     check_for_button()
                     
