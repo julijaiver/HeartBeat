@@ -2,7 +2,7 @@ from machine import Pin, ADC, I2C
 from piotimer import Piotimer
 from fifo import Fifo
 from ssd1306 import SSD1306_I2C
-from HR_measure2 import hr_measure
+from HR_measure import hr_measure
 from HRV import hrv_analysis
 from kubios import kubios
 from mqtt import connect_wlan
