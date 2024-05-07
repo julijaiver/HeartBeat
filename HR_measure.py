@@ -61,7 +61,7 @@ def hr_measure(encoder, oled, display_menu, display):
     peak_max = 0
     
     start_time = time.time()
-    measurement_duration = 15
+    measurement_duration = 30
     remaining_time = None
     ppg_counter = 0
     ppg_avg = 0
