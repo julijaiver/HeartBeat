@@ -81,7 +81,8 @@ def check_for_button():
 def display_results(results, result_list):
     global yval, text_height
     for item in result_list:
-        oled.text(f"{item}: {results[item]}", xval, yval, 1)
+        oled.text(f"{item}", xval, yval, 1)
+        oled.text(f"{results[item]}", int(oled_width/2), yval, 1)
         yval += text_height
     oled.text("PRESS TO EXIT", 10, 55, 1)
     oled.show()
@@ -89,7 +90,8 @@ def display_results(results, result_list):
 def display_kubios_results(results, result_list):
     global yval, text_height
     for i in range(selected_item, selected_item+4):
-        oled.text(f"{result_list[i]}: {results[result_list[i]]}", xval, yval, 1)
+        oled.text(f"{result_list[i]}", xval, yval, 1)
+        oled.text(f"{results[result_list[i]]:.2f}", int(oled_width/2), yval, 1)
         yval += text_height
     oled.text("SCROLL DATA", 10, 48, 1)
     oled.text("PRESS TO EXIT", 10, 56, 1)
@@ -190,8 +192,13 @@ while True:
                         display_text("Connected", "center")
                         display_text("Please wait", "bottom")
                         kubios_data = kubios(ppi_list)
+                        
                         if kubios_data:
                             save_history(kubios_data)
+                            if connect_mqtt("measurements", json.dumps(kubios_data)):
+                                oled.fill(0)
+                                display_text("MQTT Sent", "center")
+                                time.sleep(3)
                             print(kubios_data)
                             kubios_data_display = True
                             selected_item = 0
@@ -212,6 +219,7 @@ while True:
                                             selected_item = 0
                                     else:
                                         kubios_data_display = value
+                                        selected_item = 0
                     #check_for_button()
                         else:
                             oled.fill(0)
