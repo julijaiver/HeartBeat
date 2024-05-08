@@ -150,16 +150,29 @@ while True:
                     display_text("Place finger", "center")
                     time.sleep(3)
                     ppi_list = hr_measure(encoder, oled, display_menu, display=False)
-                    results = hrv_analysis(ppi_list)
-                    save_history(results)
+                    oled.fill(0)
+                    
+                    if connect_wlan():
+                        oled.fill(0)
+                        display_text("Connected", "center")
+                        display_text("Please wait", "bottom")
+                        results = hrv_analysis(ppi_list, timezone=True)
+                        save_history(results)
+                        if connect_mqtt("measurements", json.dumps(results)):
+                            oled.fill(0)
+                            display_text("MQTT Sent", "center")
+                            time.sleep(3)
+                    else:
+                        display_text("No connection", "center")
+                        results = hrv_analysis(ppi_list, timezone=False)
+                        save_history(results)
+                        time.sleep(3)
                     oled.fill(0)
                     yval = 0
                     oled.text(f"{results['Time']}", xval, yval, 1)
                     yval += text_height*2
-                    
                     result_items = ['Avg HR', 'Avg PPI', 'RMSSD', 'SDNN']
                     display_results(results, result_items)
-            
                     #current_timestamp = time.time()
                     #formatted_time = time.localtime(current_timestamp)
             
@@ -176,34 +189,40 @@ while True:
                     if connect_wlan():
                         display_text("Connected", "center")
                         display_text("Please wait", "bottom")
+                        kubios_data = kubios(ppi_list)
+                        if kubios_data:
+                            save_history(kubios_data)
+                            print(kubios_data)
+                            kubios_data_display = True
+                            selected_item = 0
+                            while kubios_data_display:
+                                oled.fill(0)
+                                yval = 0
+                                oled.text(f"{kubios_data['Time']}", xval, yval, 1)
+                                yval += text_height*2
+                                result_list = ['RMSSD', 'SDNN', 'HR','SD1','SD2', 'PNS', 'SNS', 'STRESS']
+                                display_kubios_results(kubios_data, result_list)
+                                while encoder.fifo.has_data():
+                                    value = encoder.fifo.get()
+                                    if value != 0:
+                                        selected_item += value
+                                        if selected_item >= len(result_list)-4:
+                                            selected_item = len(result_list)-4
+                                        elif selected_item <= 0:  
+                                            selected_item = 0
+                                    else:
+                                        kubios_data_display = value
+                    #check_for_button()
+                        else:
+                            oled.fill(0)
+                            display_text("Kubios Error", "center")
+                            time.sleep(3)
+                            #display_menu()
                     else:
                         display_text("No connection", "center")
                         time.sleep(3)
-                        display_menu()
-                    kubios_data = kubios(ppi_list)
-                    save_history(kubios_data)
-                    print(kubios_data)
+                        #display_menu()
                     
-                    kubios_data_display = True
-                    selected_item = 0
-                    while kubios_data_display:
-                        oled.fill(0)
-                        yval = 0
-                        oled.text(f"{kubios_data['Time']}", xval, yval, 1)
-                        yval += text_height*2
-                        result_list = ['RMSSD', 'SDNN', 'HR','SD1','SD2', 'PNS', 'SNS', 'STRESS']
-                        display_kubios_results(kubios_data, result_list)
-                        while encoder.fifo.has_data():
-                            value = encoder.fifo.get()
-                            if value != 0:
-                                selected_item += value
-                                if selected_item >= len(result_list)-4:
-                                    selected_item = len(result_list)-4
-                                elif selected_item <= 0:  
-                                    selected_item = 0
-                            else:
-                                kubios_data_display = value
-                    #check_for_button()
                 
                 elif selected_item == 3:
                     history_on = True

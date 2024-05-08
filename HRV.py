@@ -1,8 +1,12 @@
+import ntptime
 import time
 
-def hrv_analysis(ppi_ms_list):
+def hrv_analysis(ppi_ms_list, timezone):
     current_timestamp = time.time()
     formatted_time = time.localtime(current_timestamp)
+    if timezone:
+        ntptime.settime()
+        formatted_time = time.localtime()
                     
     print(f"Current time:, {formatted_time[0]}-{formatted_time[1]}-{formatted_time[2]} {formatted_time[3]}:{formatted_time[4]}")
     results = {
