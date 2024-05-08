@@ -5,7 +5,7 @@ from ssd1306 import SSD1306_I2C
 from HR_measure import hr_measure
 from HRV import hrv_analysis
 from kubios import kubios
-from mqtt import connect_wlan
+from mqtt import connect_wlan, connect_mqtt
 import text_display
 import time
 import micropython
