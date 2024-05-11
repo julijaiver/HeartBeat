@@ -1,5 +1,4 @@
 import urequests as requests
-import ujson
 import network
 import time
 import ntptime

@@ -5,7 +5,6 @@ from fifo import Fifo
 import heart
 import heart_graph
 import text_display
-import scale_ppg
 
 class Sensor:
     def __init__(self, pin):
