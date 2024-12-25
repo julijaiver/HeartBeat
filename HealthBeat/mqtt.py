@@ -4,9 +4,9 @@ from umqtt.simple import MQTTClient
 from machine import Timer
 
 # Replace these values with your own
-SSID = "KMD652_Group_4"
-PASSWORD = "HWgroup4"
-BROKER_IP = "192.168.4.253"
+SSID = ""
+PASSWORD = ""
+BROKER_IP = ""
 
 # Function to connect to WLAN
 def connect_wlan():
